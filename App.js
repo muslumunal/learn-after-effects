@@ -1,32 +1,28 @@
 import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import HomeScreen from "./src/screens/HomeScreen";
 import DerslerimScreen from "./src/screens/DerslerimScreen";
 import KonuDetayScreen from "./src/screens/KonuDetayScreen";
+import AltKonularScreen from "./src/screens/AltKonularScreen";
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator>
-        <Stack.Screen
-          name="Home"
-          component={HomeScreen}
-          options={{
-            title: "Anasayfa",
-            headerStyle: {
-              backgroundColor: "#007AFF",
-            },
-            headerTintColor: "#fff",
-          }}
-        />
+      <Stack.Navigator initialRouteName="Derslerim">
         <Stack.Screen
           name="Derslerim"
           component={DerslerimScreen}
           options={{
-            title: "Derslerim",
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="AltKonular"
+          component={AltKonularScreen}
+          options={{
+            title: "Alt Konular",
             headerStyle: {
               backgroundColor: "#007AFF",
             },

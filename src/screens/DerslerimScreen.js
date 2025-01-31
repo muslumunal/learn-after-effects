@@ -1,230 +1,288 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  TextInput,
+  Dimensions,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+
+const { width } = Dimensions.get("window");
+const CARD_WIDTH = (width - 45) / 2; // 2 sütun için
 
 const DerslerimScreen = ({ navigation }) => {
-  const [dersler, setDersler] = useState([
+  const [searchText, setSearchText] = useState("");
+  const [dersler] = useState([
     {
       id: 1,
       baslik: "JavaScript Temelleri",
-      tamamlandi: false,
+      color: "#FF6B6B",
+      bgColor: "#FFE4E1",
       altKonular: [
         {
           id: 1,
           baslik: "Değişkenler ve Veri Tipleri",
-          tamamlandi: false,
-          videoId: "xyz123", // YouTube video ID
+          videoId: "q2ZF29z_XGg",
+          tamamlandi: true,
           aciklama:
             "Bu derste JavaScript'te değişkenler ve veri tiplerini öğreneceksiniz.",
         },
         {
           id: 2,
           baslik: "Fonksiyonlar",
+          videoId: "q2ZF29z_XGg",
           tamamlandi: false,
-          videoId: "abc456",
           aciklama:
             "JavaScript'te fonksiyonların kullanımını ve önemini öğreneceksiniz.",
+        },
+        {
+          id: 3,
+          baslik: "Döngüler",
+          videoId: "q2ZF29z_XGg",
+          tamamlandi: false,
+          aciklama: "JavaScript'te döngü yapılarını öğreneceksiniz.",
+        },
+        {
+          id: 4,
+          baslik: "Diziler",
+          videoId: "q2ZF29z_XGg",
+          tamamlandi: true,
+          aciklama: "JavaScript'te dizi işlemlerini öğreneceksiniz.",
         },
       ],
     },
     {
       id: 2,
-      baslik: "React Native Giriş",
-      tamamlandi: false,
+      baslik: "React Native",
+      color: "#4169E1",
+      bgColor: "#E6E6FA",
       altKonular: [
         {
           id: 1,
           baslik: "Component Yapısı",
-          tamamlandi: false,
           videoId: "def789",
+          tamamlandi: true,
           aciklama:
             "React Native'de component yapısını ve yaşam döngüsünü öğreneceksiniz.",
         },
         {
           id: 2,
           baslik: "Props ve State",
-          tamamlandi: false,
           videoId: "ghi012",
+          tamamlandi: false,
           aciklama:
             "Props ve State kavramlarını detaylı olarak öğreneceksiniz.",
         },
       ],
     },
+    {
+      id: 3,
+      baslik: "HTML & CSS",
+      dersCount: "5 konu",
+      color: "#FFA500",
+      bgColor: "#FFEFD5",
+      altKonular: [],
+    },
+    {
+      id: 4,
+      baslik: "Python",
+      dersCount: "8 konu",
+      color: "#32CD32",
+      bgColor: "#F0FFF0",
+      altKonular: [],
+    },
+    {
+      id: 5,
+      baslik: "Veri Yapıları",
+      dersCount: "7 konu",
+      color: "#FF69B4",
+      bgColor: "#FFE4E1",
+      altKonular: [],
+    },
+    {
+      id: 6,
+      baslik: "Algoritma",
+      dersCount: "6 konu",
+      color: "#9370DB",
+      bgColor: "#E6E6FA",
+      altKonular: [],
+    },
+    {
+      id: 7,
+      baslik: "SQL",
+      dersCount: "4 konu",
+      color: "#20B2AA",
+      bgColor: "#E0FFFF",
+      altKonular: [],
+    },
+    {
+      id: 8,
+      baslik: "Git & GitHub",
+      dersCount: "3 konu",
+      color: "#FF8C00",
+      bgColor: "#FFDAB9",
+      altKonular: [],
+    },
   ]);
 
-  const [expandedKonu, setExpandedKonu] = useState(null);
+  // Arama sonuçlarını filtreleyen fonksiyon
+  const filteredDersler = dersler.filter((konu) =>
+    konu.baslik.toLowerCase().includes(searchText.toLowerCase())
+  );
 
-  // Uygulama açıldığında kayıtlı verileri yükle
-  useEffect(() => {
-    loadSavedProgress();
-  }, []);
-
-  // Kayıtlı ilerlemeyi yükle
-  const loadSavedProgress = async () => {
-    try {
-      const savedProgress = await AsyncStorage.getItem("derslerProgress");
-      if (savedProgress) {
-        setDersler(JSON.parse(savedProgress));
-      }
-    } catch (error) {
-      console.error("İlerleme yüklenirken hata oluştu:", error);
-    }
-  };
-
-  // İlerlemeyi kaydet
-  const saveProgress = async (updatedDersler) => {
-    try {
-      await AsyncStorage.setItem(
-        "derslerProgress",
-        JSON.stringify(updatedDersler)
-      );
-    } catch (error) {
-      console.error("İlerleme kaydedilirken hata oluştu:", error);
-    }
-  };
-
-  const handleKonuTamamla = (konuId, altKonuId) => {
-    setDersler((prevDersler) => {
-      const updatedDersler = prevDersler.map((konu) => {
-        if (konu.id === konuId) {
-          return {
-            ...konu,
-            altKonular: konu.altKonular.map((altKonu) => {
-              if (altKonu.id === altKonuId) {
-                return {
-                  ...altKonu,
-                  tamamlandi: true,
-                };
-              }
-              return altKonu;
-            }),
-          };
-        }
-        return konu;
-      });
-
-      // İlerlemeyi kaydet
-      saveProgress(updatedDersler);
-      return updatedDersler;
-    });
-  };
-
-  const toggleKonu = (konuId) => {
-    setExpandedKonu(expandedKonu === konuId ? null : konuId);
-  };
-
-  const konuTamamlandiMi = (konu) => {
-    return konu.altKonular.every((alt) => alt.tamamlandi);
+  // Alt konuların sayısını ve tamamlananları hesaplayan fonksiyon
+  const getKonuDurumu = (altKonular) => {
+    const toplamKonu = altKonular.length;
+    const tamamlanan = altKonular.filter((konu) => konu.tamamlandi).length;
+    return `${tamamlanan}/${toplamKonu} konu`;
   };
 
   return (
-    <ScrollView style={styles.container}>
-      {dersler.map((konu) => (
-        <View key={konu.id} style={styles.konuContainer}>
-          <TouchableOpacity
-            style={[
-              styles.konuBaslik,
-              konuTamamlandiMi(konu) && styles.tamamlandiBackground,
-            ]}
-            onPress={() => toggleKonu(konu.id)}
-          >
-            <Text style={styles.konuBaslikText}>{konu.baslik}</Text>
-            <Icon
-              name={
-                expandedKonu === konu.id
-                  ? "keyboard-arrow-up"
-                  : "keyboard-arrow-down"
-              }
-              size={24}
-              color="#333"
-            />
-          </TouchableOpacity>
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.greeting}>Hoş Geldiniz!</Text>
+      </View>
 
-          {expandedKonu === konu.id && (
-            <View style={styles.altKonularContainer}>
-              {konu.altKonular.map((altKonu) => (
-                <TouchableOpacity
-                  key={altKonu.id}
+      <View style={styles.searchContainer}>
+        <Icon name="search" size={20} color="#666" />
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Konu ara..."
+          value={searchText}
+          onChangeText={setSearchText}
+          placeholderTextColor="#666"
+          autoCapitalize="none" // Büyük/küçük harf duyarlılığı için
+          autoCorrect={false} // Otomatik düzeltmeyi kapatır
+        />
+        {searchText.length > 0 && (
+          <TouchableOpacity onPress={() => setSearchText("")}>
+            <Icon name="close" size={20} color="#666" />
+          </TouchableOpacity>
+        )}
+      </View>
+
+      <ScrollView style={styles.courseList}>
+        <View style={styles.coursesGrid}>
+          {filteredDersler.length > 0 ? (
+            filteredDersler.map((konu) => (
+              <TouchableOpacity
+                key={konu.id}
+                style={[styles.courseCard, { backgroundColor: konu.bgColor }]}
+                onPress={() =>
+                  navigation.navigate("AltKonular", {
+                    konuBaslik: konu.baslik,
+                    altKonular: konu.altKonular,
+                    konuId: konu.id,
+                  })
+                }
+              >
+                <View style={styles.courseContent}>
+                  <Text style={styles.courseTitle}>{konu.baslik}</Text>
+                  <Text style={styles.courseCount}>
+                    {getKonuDurumu(konu.altKonular)}
+                  </Text>
+                </View>
+                <View
                   style={[
-                    styles.altKonu,
-                    altKonu.tamamlandi && styles.tamamlandiBackground,
+                    styles.courseDecoration,
+                    { backgroundColor: konu.color },
                   ]}
-                  onPress={() =>
-                    navigation.navigate("KonuDetay", {
-                      konu: altKonu.baslik,
-                      videoId: altKonu.videoId,
-                      aciklama: altKonu.aciklama,
-                      konuId: konu.id,
-                      altKonuId: altKonu.id,
-                      tamamlandi: altKonu.tamamlandi,
-                      onTamamla: handleKonuTamamla,
-                    })
-                  }
-                >
-                  <Text style={styles.altKonuText}>{altKonu.baslik}</Text>
-                  {altKonu.tamamlandi && (
-                    <Icon name="check-circle" size={20} color="#34C759" />
-                  )}
-                </TouchableOpacity>
-              ))}
+                />
+              </TouchableOpacity>
+            ))
+          ) : (
+            <View style={styles.noResultContainer}>
+              <Text style={styles.noResultText}>
+                "{searchText}" ile ilgili konu bulunamadı
+              </Text>
             </View>
           )}
         </View>
-      ))}
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
-    padding: 15,
+    backgroundColor: "#FFF",
   },
-  konuContainer: {
-    marginBottom: 15,
-    borderRadius: 10,
-    overflow: "hidden",
-    borderWidth: 1,
-    borderColor: "#ddd",
+  header: {
+    padding: 20,
+    paddingTop: 40,
   },
-  konuBaslik: {
-    padding: 15,
-    backgroundColor: "#f8f8f8",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  konuBaslikText: {
-    fontSize: 18,
+  greeting: {
+    fontSize: 28,
     fontWeight: "bold",
+    color: "#333",
   },
-  altKonularContainer: {
-    padding: 10,
-  },
-  altKonu: {
-    padding: 15,
-    backgroundColor: "#fff",
-    marginVertical: 5,
-    borderRadius: 8,
+  searchContainer: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#eee",
+    backgroundColor: "#F0F0F0",
+    margin: 20,
+    padding: 12,
+    borderRadius: 25,
   },
-  altKonuText: {
+  searchInput: {
+    flex: 1,
+    marginLeft: 10,
+    marginRight: 10,
     fontSize: 16,
   },
-  tamamlandiBackground: {
-    backgroundColor: "#e8fff0",
+  courseList: {
+    flex: 1,
+  },
+  coursesGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    padding: 10,
+    justifyContent: "space-between",
+  },
+  courseCard: {
+    width: CARD_WIDTH,
+    height: CARD_WIDTH * 0.8,
+    borderRadius: 20,
+    padding: 15,
+    marginBottom: 15,
+    overflow: "hidden",
+  },
+  courseContent: {
+    flex: 1,
+    justifyContent: "space-between",
+  },
+  courseTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+  },
+  courseCount: {
+    fontSize: 14,
+    color: "#666",
+  },
+  courseDecoration: {
+    position: "absolute",
+    bottom: -20,
+    right: -20,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    opacity: 0.3,
+  },
+  noResultContainer: {
+    flex: 1,
+    padding: 20,
+    alignItems: "center",
+    width: "100%",
+  },
+  noResultText: {
+    fontSize: 16,
+    color: "#666",
+    textAlign: "center",
   },
 });
 

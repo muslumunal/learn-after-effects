@@ -35,7 +35,10 @@ const KonuDetayScreen = ({ route, navigation }) => {
         <YoutubePlayer height={220} videoId={videoId} />
       </View>
 
-      <Text style={styles.aciklama}>{aciklama}</Text>
+      <Text style={styles.aciklama}>
+        {aciklama}
+        {videoId}
+      </Text>
 
       <TouchableOpacity
         style={[styles.tamamlaButton, tamamlandi && styles.tamamlandiButton]}

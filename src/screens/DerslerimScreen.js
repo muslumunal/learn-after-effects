@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -13,7 +13,7 @@ import Icon from "react-native-vector-icons/MaterialIcons";
 const { width } = Dimensions.get("window");
 const CARD_WIDTH = (width - 45) / 2; // 2 sütun için
 
-const DerslerimScreen = ({ navigation }) => {
+const DerslerimScreen = ({ route, navigation }) => {
   const [searchText, setSearchText] = useState("");
   const [dersler, setDersler] = useState([
     {
@@ -38,6 +38,13 @@ const DerslerimScreen = ({ navigation }) => {
         },
         {
           id: 3,
+          baslik: "Şekil Araçları(Shape Tools)",
+          videoId: "q2ZF29z_XGg",
+          tamamlandi: false,
+          aciklama: "Açıklama",
+        },
+        {
+          id: 4,
           baslik: "Şekil Araçları(Shape Tools)",
           videoId: "q2ZF29z_XGg",
           tamamlandi: false,
@@ -166,6 +173,16 @@ const DerslerimScreen = ({ navigation }) => {
     const tamamlanan = altKonular.filter((konu) => konu.tamamlandi).length;
     return `${tamamlanan}/${toplamKonu} konu`;
   };
+
+  // Güncelleme parametrelerini dinliyoruz
+  useEffect(() => {
+    if (route.params?.konuGuncellendi) {
+      handleKonuTamamla(
+        route.params.guncelKonuId,
+        route.params.guncelAltKonuId
+      );
+    }
+  }, [route.params?.konuGuncellendi]);
 
   return (
     <View style={styles.container}>

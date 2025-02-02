@@ -20,24 +20,25 @@ const AltKonularScreen = ({ route, navigation }) => {
     konuRenk,
   } = route.params || {};
 
-  // Alt konuları state'e alıyoruz ve başlangıç değeri kontrol ediyoruz
-  const [altKonular, setAltKonular] = useState(initialAltKonular || []);
+  const [altKonular, setAltKonular] = useState(initialAltKonular);
 
-  // Güncelleme parametrelerini dinliyoruz
+  // Alt konular güncellendiğinde state'i güncelle
   useEffect(() => {
-    if (route.params?.konuGuncellendi) {
-      const updatedAltKonular = altKonular.map((altKonu) => {
-        if (altKonu.id === route.params.guncelAltKonuId) {
-          return {
-            ...altKonu,
-            tamamlandi: true,
-          };
+    setAltKonular(initialAltKonular);
+  }, [initialAltKonular]);
+
+  // Konuyu tamamlama işlemi
+  const handleKonuTamamla = (konuId, altKonuId) => {
+    onTamamla(konuId, altKonuId);
+    setAltKonular((prevAltKonular) =>
+      prevAltKonular.map((altKonu) => {
+        if (altKonu.id === altKonuId) {
+          return { ...altKonu, tamamlandi: true };
         }
         return altKonu;
-      });
-      setAltKonular(updatedAltKonular);
-    }
-  }, [route.params?.konuGuncellendi]);
+      })
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -74,7 +75,8 @@ const AltKonularScreen = ({ route, navigation }) => {
                   konuId: konuId,
                   altKonuId: altKonu.id,
                   tamamlandi: altKonu.tamamlandi,
-                  onTamamla: onTamamla,
+                  onTamamla: handleKonuTamamla,
+                  konuRenk: konuRenk,
                 })
               }
             >

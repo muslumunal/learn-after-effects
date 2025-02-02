@@ -29,11 +29,7 @@ export default function App() {
           name="KonuDetay"
           component={KonuDetayScreen}
           options={{
-            title: "Konu Detayı",
-            headerStyle: {
-              backgroundColor: "#007AFF",
-            },
-            headerTintColor: "#fff",
+            headerShown: false,
           }}
         />
       </Stack.Navigator>

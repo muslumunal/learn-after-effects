@@ -22,11 +22,7 @@ export default function App() {
           name="AltKonular"
           component={AltKonularScreen}
           options={{
-            title: "Alt Konular",
-            headerStyle: {
-              backgroundColor: "#007AFF",
-            },
-            headerTintColor: "#fff",
+            headerShown: false,
           }}
         />
         <Stack.Screen

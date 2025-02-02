@@ -17,6 +17,9 @@ const KonuDetayScreen = ({ route, navigation }) => {
     altKonuId,
     tamamlandi: initialTamamlandi,
     onTamamla,
+    konuBaslik,
+    altKonular: initialAltKonular,
+    konuRenk,
   } = route.params;
 
   const [tamamlandi, setTamamlandi] = useState(initialTamamlandi);
@@ -24,6 +27,15 @@ const KonuDetayScreen = ({ route, navigation }) => {
   const handleTamamla = () => {
     setTamamlandi(true);
     onTamamla(konuId, altKonuId);
+
+    // Önce önceki ekranın parametrelerini güncelle
+    navigation.setParams({
+      konuGuncellendi: true,
+      guncelKonuId: konuId,
+      guncelAltKonuId: altKonuId,
+    });
+
+    // Sonra geri dön
     navigation.goBack();
   };
 

@@ -15,72 +15,61 @@ const CARD_WIDTH = (width - 45) / 2; // 2 sütun için
 
 const DerslerimScreen = ({ navigation }) => {
   const [searchText, setSearchText] = useState("");
-  const [dersler] = useState([
+  const [dersler, setDersler] = useState([
     {
       id: 1,
-      baslik: "JavaScript Temelleri",
+      baslik: "Temel Araçlar",
       color: "#FF6B6B",
       bgColor: "#FFE4E1",
       altKonular: [
         {
           id: 1,
-          baslik: "Değişkenler ve Veri Tipleri",
+          baslik: "Seçim Aracı(Selection Tool)",
           videoId: "q2ZF29z_XGg",
           tamamlandi: true,
-          aciklama:
-            "Bu derste JavaScript'te değişkenler ve veri tiplerini öğreneceksiniz.",
+          aciklama: "Açıklama",
         },
         {
           id: 2,
-          baslik: "Fonksiyonlar",
+          baslik: "Çizim Aracı(Drawing Tool)",
           videoId: "q2ZF29z_XGg",
           tamamlandi: false,
-          aciklama:
-            "JavaScript'te fonksiyonların kullanımını ve önemini öğreneceksiniz.",
+          aciklama: "Açıklama",
         },
         {
           id: 3,
-          baslik: "Döngüler",
+          baslik: "Şekil Araçları(Shape Tools)",
           videoId: "q2ZF29z_XGg",
           tamamlandi: false,
-          aciklama: "JavaScript'te döngü yapılarını öğreneceksiniz.",
-        },
-        {
-          id: 4,
-          baslik: "Diziler",
-          videoId: "q2ZF29z_XGg",
-          tamamlandi: true,
-          aciklama: "JavaScript'te dizi işlemlerini öğreneceksiniz.",
+          aciklama: "Açıklama",
         },
       ],
     },
     {
       id: 2,
-      baslik: "React Native",
+      baslik: "Animasyon Teknikleri",
       color: "#4169E1",
       bgColor: "#E6E6FA",
       altKonular: [
         {
           id: 1,
-          baslik: "Component Yapısı",
+          baslik: "Position Animation",
           videoId: "def789",
           tamamlandi: true,
-          aciklama:
-            "React Native'de component yapısını ve yaşam döngüsünü öğreneceksiniz.",
+          aciklama: "Açıklama",
         },
         {
           id: 2,
-          baslik: "Props ve State",
+          baslik: "Scale Animation",
           videoId: "ghi012",
           tamamlandi: false,
-          aciklama:
-            "Props ve State kavramlarını detaylı olarak öğreneceksiniz.",
+          aciklama: "Açıklama",
         },
       ],
     },
     {
       id: 3,
-      baslik: "HTML & CSS",
+      baslik: "Kamera Hareketleri",
       dersCount: "5 konu",
       color: "#FFA500",
       bgColor: "#FFEFD5",
@@ -88,15 +77,30 @@ const DerslerimScreen = ({ navigation }) => {
     },
     {
       id: 4,
-      baslik: "Python",
+      baslik: "Efektler",
       dersCount: "8 konu",
       color: "#32CD32",
       bgColor: "#F0FFF0",
-      altKonular: [],
+      altKonular: [
+        {
+          id: 1,
+          baslik: "Green Screen",
+          videoId: "ghi012",
+          tamamlandi: false,
+          aciklama: "Açıklama",
+        },
+        {
+          id: 2,
+          baslik: "Blue Screen",
+          videoId: "ghi012",
+          tamamlandi: false,
+          aciklama: "Açıklama",
+        },
+      ],
     },
     {
       id: 5,
-      baslik: "Veri Yapıları",
+      baslik: "Yazı İşlemleri",
       dersCount: "7 konu",
       color: "#FF69B4",
       bgColor: "#FFE4E1",
@@ -104,7 +108,7 @@ const DerslerimScreen = ({ navigation }) => {
     },
     {
       id: 6,
-      baslik: "Algoritma",
+      baslik: "Örnek Uygulamalar",
       dersCount: "6 konu",
       color: "#9370DB",
       bgColor: "#E6E6FA",
@@ -112,7 +116,7 @@ const DerslerimScreen = ({ navigation }) => {
     },
     {
       id: 7,
-      baslik: "SQL",
+      baslik: "Harici Kütüphaneler",
       dersCount: "4 konu",
       color: "#20B2AA",
       bgColor: "#E0FFFF",
@@ -120,13 +124,36 @@ const DerslerimScreen = ({ navigation }) => {
     },
     {
       id: 8,
-      baslik: "Git & GitHub",
+      baslik: "İleri Teknikler",
       dersCount: "3 konu",
       color: "#FF8C00",
       bgColor: "#FFDAB9",
       altKonular: [],
     },
   ]);
+
+  // Konuyu tamamlama fonksiyonu
+  const handleKonuTamamla = (konuId, altKonuId) => {
+    setDersler((prevDersler) =>
+      prevDersler.map((konu) => {
+        if (konu.id === konuId) {
+          return {
+            ...konu,
+            altKonular: konu.altKonular.map((altKonu) => {
+              if (altKonu.id === altKonuId) {
+                return {
+                  ...altKonu,
+                  tamamlandi: true,
+                };
+              }
+              return altKonu;
+            }),
+          };
+        }
+        return konu;
+      })
+    );
+  };
 
   // Arama sonuçlarını filtreleyen fonksiyon
   const filteredDersler = dersler.filter((konu) =>
@@ -176,6 +203,8 @@ const DerslerimScreen = ({ navigation }) => {
                     konuBaslik: konu.baslik,
                     altKonular: konu.altKonular,
                     konuId: konu.id,
+                    onTamamla: handleKonuTamamla,
+                    konuRenk: konu.color,
                   })
                 }
               >

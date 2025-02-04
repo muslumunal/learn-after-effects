@@ -58,6 +58,10 @@ const AltKonularScreen = ({ route, navigation }) => {
         />
       </View>
       <Text style={styles.title}>{konuBaslik}</Text>
+      <Text style={styles.progressText}>
+        {altKonular.filter((konu) => konu.tamamlandi).length}/
+        {altKonular.length} konu tamamlandı
+      </Text>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.contentContainer}>
           {altKonular.map((altKonu, index) => (
@@ -160,10 +164,16 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 20,
+    marginBottom: 8,
     marginTop: 100,
     paddingHorizontal: 20,
     color: "#444",
+  },
+  progressText: {
+    fontSize: 16,
+    color: "#666",
+    marginBottom: 20,
+    paddingHorizontal: 20,
   },
   contentContainer: {
     padding: 20,

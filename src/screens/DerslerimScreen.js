@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { DersController } from "../controllers/DersController";
 
 const { width } = Dimensions.get("window");
 const CARD_WIDTH = (width - 45) / 2; // 2 sütun için
@@ -18,65 +19,22 @@ const DerslerimScreen = ({ route, navigation }) => {
   const [searchText, setSearchText] = useState("");
   const [dersler, setDersler] = useState([]);
 
-  // Uygulama açıldığında kayıtlı dersleri yükle
   useEffect(() => {
     loadDersler();
   }, []);
 
-  // Dersleri AsyncStorage'dan yükle
   const loadDersler = async () => {
-    try {
-      const savedDersler = await AsyncStorage.getItem("dersler");
-      if (savedDersler) {
-        setDersler(JSON.parse(savedDersler));
-      } else {
-        // İlk kez yükleniyorsa varsayılan dersleri kaydet
-        setDersler(defaultDersler);
-        await AsyncStorage.setItem("dersler", JSON.stringify(defaultDersler));
-      }
-    } catch (error) {
-      console.error("Dersler yüklenirken hata:", error);
-    }
+    const loadedDersler = await DersController.loadDersler();
+    setDersler(loadedDersler);
   };
 
-  // Konuyu tamamlama fonksiyonu
   const handleKonuTamamla = async (konuId, altKonuId) => {
-    try {
-      // Önce mevcut dersleri al
-      const currentDersler = await AsyncStorage.getItem("dersler");
-      let parsedDersler = currentDersler
-        ? JSON.parse(currentDersler)
-        : defaultDersler;
-
-      // Güncellemeyi yap
-      const updatedDersler = parsedDersler.map((konu) => {
-        if (konu.id === konuId) {
-          return {
-            ...konu,
-            altKonular: konu.altKonular.map((altKonu) => {
-              if (altKonu.id === altKonuId) {
-                return {
-                  ...altKonu,
-                  tamamlandi: true,
-                };
-              }
-              return altKonu;
-            }),
-          };
-        }
-        return konu;
-      });
-
-      // State'i güncelle
-      setDersler(updatedDersler);
-
-      // AsyncStorage'a kaydet
-      await AsyncStorage.setItem("dersler", JSON.stringify(updatedDersler));
-
-      console.log("Konu başarıyla tamamlandı ve kaydedildi");
-    } catch (error) {
-      console.error("Konu tamamlanırken hata oluştu:", error);
-    }
+    const updatedDersler = await DersController.konuyuTamamla(
+      dersler,
+      konuId,
+      altKonuId
+    );
+    setDersler(updatedDersler);
   };
 
   // Varsayılan ders verileri

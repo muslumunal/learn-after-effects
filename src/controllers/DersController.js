@@ -14,7 +14,7 @@ export class DersController {
       return defaultDersler;
     } catch (error) {
       console.error("Dersler yüklenirken hata:", error);
-      return [];
+      return defaultDersler; // Hata durumunda boş array yerine defaultDersler döndür
     }
   }
 
@@ -40,6 +40,24 @@ export class DersController {
     } catch (error) {
       console.error("Konu tamamlanırken hata:", error);
       return dersler;
+    }
+  }
+
+  static async loadLanguage() {
+    try {
+      const savedLanguage = await AsyncStorage.getItem("language");
+      return savedLanguage || "tr"; // Varsayılan dil tr
+    } catch (error) {
+      console.error("Dil yüklenirken hata:", error);
+      return "tr";
+    }
+  }
+
+  static async saveLanguage(language) {
+    try {
+      await AsyncStorage.setItem("language", language);
+    } catch (error) {
+      console.error("Dil kaydedilirken hata:", error);
     }
   }
 }

@@ -11,16 +11,32 @@ import {
 import Icon from "react-native-vector-icons/MaterialIcons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { DersController } from "../controllers/DersController";
+import { useTranslation } from "react-i18next";
+import "../translations/i18n";
 
 const { width } = Dimensions.get("window");
 const CARD_WIDTH = (width - 45) / 2; // 2 sütun için
 
 const DerslerimScreen = ({ route, navigation }) => {
+  const { t, i18n } = useTranslation();
+  const [currentLanguage, setCurrentLanguage] = useState(i18n.language);
+  const [isLanguageDropdownOpen, setIsLanguageDropdownOpen] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [dersler, setDersler] = useState([]);
 
   useEffect(() => {
-    loadDersler();
+    const initializeApp = async () => {
+      // Önce kaydedilmiş dili yükle
+      const savedLanguage = await DersController.loadLanguage();
+      i18n.changeLanguage(savedLanguage);
+      setCurrentLanguage(savedLanguage);
+
+      // Sadece dersleri temizle ve yeniden yükle
+      await AsyncStorage.removeItem("dersler");
+      loadDersler();
+    };
+
+    initializeApp();
   }, []);
 
   const loadDersler = async () => {
@@ -37,135 +53,11 @@ const DerslerimScreen = ({ route, navigation }) => {
     setDersler(updatedDersler);
   };
 
-  // Varsayılan ders verileri
-  const defaultDersler = [
-    {
-      id: 1,
-      baslik: "Temel Araçlar",
-      color: "#FF6B6B",
-      bgColor: "#FFE4E1",
-      altKonular: [
-        {
-          id: 1,
-          baslik: "Seçim Aracı(Selection Tool)",
-          videoId: "q2ZF29z_XGg",
-          tamamlandi: true,
-          aciklama: "Açıklama",
-        },
-        {
-          id: 2,
-          baslik: "Çizim Aracı(Drawing Tool)",
-          videoId: "q2ZF29z_XGg",
-          tamamlandi: false,
-          aciklama: "Açıklama",
-        },
-        {
-          id: 3,
-          baslik: "Şekil Araçları(Shape Tools)",
-          videoId: "q2ZF29z_XGg",
-          tamamlandi: false,
-          aciklama: "Açıklama",
-        },
-        {
-          id: 4,
-          baslik: "Şekil Araçları(Shape Tools)",
-          videoId: "q2ZF29z_XGg",
-          tamamlandi: false,
-          aciklama: "Açıklama",
-        },
-      ],
-    },
-    {
-      id: 2,
-      baslik: "Animasyon Teknikleri",
-      color: "#4169E1",
-      bgColor: "#E6E6FA",
-      altKonular: [
-        {
-          id: 1,
-          baslik: "Position Animation",
-          videoId: "def789",
-          tamamlandi: true,
-          aciklama: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-        },
-        {
-          id: 2,
-          baslik: "Scale Animation",
-          videoId: "ghi012",
-          tamamlandi: false,
-          aciklama:
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-        },
-      ],
-    },
-    {
-      id: 3,
-      baslik: "Kamera Hareketleri",
-      dersCount: "5 konu",
-      color: "#FFA500",
-      bgColor: "#FFEFD5",
-      altKonular: [],
-    },
-    {
-      id: 4,
-      baslik: "Efektler",
-      dersCount: "8 konu",
-      color: "#32CD32",
-      bgColor: "#F0FFF0",
-      altKonular: [
-        {
-          id: 1,
-          baslik: "Green Screen",
-          videoId: "ghi012",
-          tamamlandi: false,
-          aciklama: "Açıklama",
-        },
-        {
-          id: 2,
-          baslik: "Blue Screen",
-          videoId: "ghi012",
-          tamamlandi: false,
-          aciklama: "Açıklama",
-        },
-      ],
-    },
-    {
-      id: 5,
-      baslik: "Yazı İşlemleri",
-      dersCount: "7 konu",
-      color: "#FF69B4",
-      bgColor: "#FFE4E1",
-      altKonular: [],
-    },
-    {
-      id: 6,
-      baslik: "Örnek Uygulamalar",
-      dersCount: "6 konu",
-      color: "#9370DB",
-      bgColor: "#E6E6FA",
-      altKonular: [],
-    },
-    {
-      id: 7,
-      baslik: "Harici Kütüphaneler",
-      dersCount: "4 konu",
-      color: "#20B2AA",
-      bgColor: "#E0FFFF",
-      altKonular: [],
-    },
-    {
-      id: 8,
-      baslik: "İleri Teknikler",
-      dersCount: "3 konu",
-      color: "#FF8C00",
-      bgColor: "#FFDAB9",
-      altKonular: [],
-    },
-  ];
-
   // Arama sonuçlarını filtreleyen fonksiyon
   const filteredDersler = dersler.filter((konu) =>
-    konu.baslik.toLowerCase().includes(searchText.toLowerCase())
+    t(`courses.${konu.key}.title`)
+      .toLowerCase()
+      .includes(searchText.toLowerCase())
   );
 
   // Alt konuların sayısını ve tamamlananları hesaplayan fonksiyon
@@ -189,22 +81,84 @@ const DerslerimScreen = ({ route, navigation }) => {
     updateKonu();
   }, [route.params?.konuGuncellendi]);
 
+  const languages = [
+    { code: "tr", label: "Türkçe" },
+    { code: "en", label: "English" },
+  ];
+
+  const changeLanguage = async (lang) => {
+    i18n.changeLanguage(lang);
+    setCurrentLanguage(lang);
+    setIsLanguageDropdownOpen(false);
+    // Seçilen dili kaydet
+    await DersController.saveLanguage(lang);
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.greeting}>Hoş Geldiniz!</Text>
+        <Text style={styles.greeting}>{t("welcome")}</Text>
+
+        {/* Yeni dil seçici */}
+        <View style={styles.languageSelector}>
+          <TouchableOpacity
+            style={styles.languageDropdown}
+            onPress={() => setIsLanguageDropdownOpen(!isLanguageDropdownOpen)}
+          >
+            <Text style={styles.selectedLanguage}>
+              {languages.find((lang) => lang.code === currentLanguage)?.label}
+            </Text>
+            <Icon
+              name={
+                isLanguageDropdownOpen
+                  ? "keyboard-arrow-up"
+                  : "keyboard-arrow-down"
+              }
+              size={24}
+              color="#666"
+            />
+          </TouchableOpacity>
+
+          {isLanguageDropdownOpen && (
+            <View style={styles.dropdownMenu}>
+              {languages.map((lang) => (
+                <TouchableOpacity
+                  key={lang.code}
+                  style={[
+                    styles.dropdownItem,
+                    currentLanguage === lang.code && styles.activeDropdownItem,
+                  ]}
+                  onPress={() => changeLanguage(lang.code)}
+                >
+                  <Text
+                    style={[
+                      styles.dropdownText,
+                      currentLanguage === lang.code &&
+                        styles.activeDropdownText,
+                    ]}
+                  >
+                    {lang.label}
+                  </Text>
+                  {currentLanguage === lang.code && (
+                    <Icon name="check" size={20} color="#007AFF" />
+                  )}
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+        </View>
       </View>
 
       <View style={styles.searchContainer}>
         <Icon name="search" size={20} color="#666" />
         <TextInput
           style={styles.searchInput}
-          placeholder="Konu ara..."
+          placeholder={t("searchPlaceholder")}
           value={searchText}
           onChangeText={setSearchText}
           placeholderTextColor="#666"
-          autoCapitalize="none" // Büyük/küçük harf duyarlılığı için
-          autoCorrect={false} // Otomatik düzeltmeyi kapatır
+          autoCapitalize="none"
+          autoCorrect={false}
         />
         {searchText.length > 0 && (
           <TouchableOpacity onPress={() => setSearchText("")}>
@@ -222,8 +176,13 @@ const DerslerimScreen = ({ route, navigation }) => {
                 style={[styles.courseCard, { backgroundColor: konu.bgColor }]}
                 onPress={() =>
                   navigation.navigate("AltKonular", {
-                    konuBaslik: konu.baslik,
-                    altKonular: konu.altKonular,
+                    konuBaslik: t(`courses.${konu.key}.title`),
+                    altKonular: konu.altKonular.map((altKonu) => ({
+                      ...altKonu,
+                      baslik: altKonu.key
+                        ? t(`courses.${konu.key}.lessons.${altKonu.key}`)
+                        : altKonu.baslik,
+                    })),
                     konuId: konu.id,
                     onTamamla: handleKonuTamamla,
                     konuRenk: konu.color,
@@ -231,7 +190,9 @@ const DerslerimScreen = ({ route, navigation }) => {
                 }
               >
                 <View style={styles.courseContent}>
-                  <Text style={styles.courseTitle}>{konu.baslik}</Text>
+                  <Text style={styles.courseTitle}>
+                    {t(`courses.${konu.key}.title`)}
+                  </Text>
                   <Text style={styles.courseCount}>
                     {getKonuDurumu(konu.altKonular)}
                   </Text>
@@ -247,7 +208,7 @@ const DerslerimScreen = ({ route, navigation }) => {
           ) : (
             <View style={styles.noResultContainer}>
               <Text style={styles.noResultText}>
-                "{searchText}" ile ilgili konu bulunamadı
+                {t("noResults", { searchText })}
               </Text>
             </View>
           )}
@@ -264,10 +225,12 @@ const styles = StyleSheet.create({
   },
   header: {
     padding: 20,
-    paddingTop: 40,
+    paddingTop: 80,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   greeting: {
-    marginTop: 20,
     fontSize: 28,
     fontWeight: "bold",
     color: "#333",
@@ -335,6 +298,67 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#666",
     textAlign: "center",
+  },
+  languageSelector: {
+    zIndex: 1000,
+  },
+  languageDropdown: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  selectedLanguage: {
+    fontSize: 14,
+    color: "#333",
+    marginRight: 8,
+  },
+  dropdownMenu: {
+    position: "absolute",
+    top: "100%",
+    right: 0,
+    marginTop: 8,
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 4,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 5,
+    minWidth: 140,
+  },
+  dropdownItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+  },
+  activeDropdownItem: {
+    backgroundColor: "#F5F5F5",
+  },
+  dropdownText: {
+    fontSize: 14,
+    color: "#333",
+  },
+  activeDropdownText: {
+    color: "#007AFF",
+    fontWeight: "500",
   },
 });
 

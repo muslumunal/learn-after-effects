@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import YoutubePlayer from "react-native-youtube-iframe";
 import Icon from "react-native-vector-icons/Ionicons";
+import { useTranslation } from "react-i18next";
 
 const KonuDetayScreen = ({ route, navigation }) => {
   const {
@@ -22,6 +23,7 @@ const KonuDetayScreen = ({ route, navigation }) => {
   } = route.params;
 
   const [tamamlandi, setTamamlandi] = useState(initialTamamlandi);
+  const { t } = useTranslation();
 
   const handleTamamla = () => {
     setTamamlandi(true);
@@ -84,7 +86,7 @@ const KonuDetayScreen = ({ route, navigation }) => {
                 tamamlandi && { color: "#444" },
               ]}
             >
-              {tamamlandi ? "Tamamlandı" : "Konuyu Tamamla"}
+              {tamamlandi ? t("completed") : t("completeLesson")}
             </Text>
             {tamamlandi ? (
               <Icon name="checkmark-circle" size={24} color="#444" />

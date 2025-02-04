@@ -8,10 +8,12 @@ import {
   Dimensions,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
+import { useTranslation } from "react-i18next";
 
 const { width } = Dimensions.get("window");
 
 const AltKonularScreen = ({ route, navigation }) => {
+  const { t } = useTranslation();
   const {
     konuBaslik,
     altKonular: initialAltKonular = [],
@@ -59,8 +61,10 @@ const AltKonularScreen = ({ route, navigation }) => {
       </View>
       <Text style={styles.title}>{konuBaslik}</Text>
       <Text style={styles.progressText}>
-        {altKonular.filter((konu) => konu.tamamlandi).length}/
-        {altKonular.length} konu tamamlandı
+        {t("completedLessons", {
+          completed: altKonular.filter((konu) => konu.tamamlandi).length,
+          total: altKonular.length,
+        })}
       </Text>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.contentContainer}>
